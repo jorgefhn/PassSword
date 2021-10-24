@@ -1,0 +1,38 @@
+{
+  "jorge": {
+    "net": [
+      "a",
+      "b",
+      null,
+      null
+    ],
+    "shared": [
+      "netflix",
+      "c"
+    ],
+    "netflix": [
+      "jorge",
+      "a",
+      "b",
+      "c"
+    ],
+    "": [
+      "",
+      "",
+      null,
+      null
+    ]
+  },
+  "carlos": {
+    "n": [
+      "a",
+      "b",
+      null,
+      null
+    ],
+    "shared": [
+      "netflix",
+      "jorge"
+    ]
+  }
+}
