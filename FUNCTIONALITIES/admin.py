@@ -122,6 +122,36 @@ class Admin:
             print("Error:")
 
 
+    def show(self, user:str):
+        try:
+            user_sites = self.external_accounts[user]
+            key = self.users[user][1]
+
+            b64_key = key.encode("ascii")  # Recuperamos los bytes de los strings, se codifican
+            key = base64.urlsafe_b64decode(b64_key)  #
+
+            for site in user_sites:
+                if site != "shared":
+                    nonce = user_sites[site][0]
+                    b64_nonce = nonce.encode("ascii")
+                    nonce = base64.urlsafe_b64decode(b64_nonce)
+
+                    encrypted_message = user_sites[site][1]
+                    b64_encrypted_message = encrypted_message.encode("ascii")
+                    encrypted_message = base64.urlsafe_b64decode(b64_encrypted_message)
+
+                    signature = user_sites[site][2]
+                    b64_signature = signature.encode("ascii")
+                    signature = base64.urlsafe_b64decode(b64_signature)
+
+                    message = self.symetric_encryptor.symetric_decrypt(key,encrypted_message,nonce,signature)
+                    print(site + ":" + str(message))
+        except KeyError:
+            print(str(user)+": {}")
+
+
+
+
     def share_password(self,user1:str,user2:str,site:str):
         """método para que user1 le comparta a user2 la contraseña de site"""
         try:

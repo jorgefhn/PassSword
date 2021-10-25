@@ -46,7 +46,8 @@ while True:
 
                 if action == "1":
                     try:
-                        print(admin.external_accounts[app_user])
+                        print("CONTRASEÑAS GUARDADAS:")
+                        admin.show(app_user)
                     except KeyError:
                         admin.external_accounts[app_user] = {"shared": {}}
                         admin.save_json_information(admin.external_accounts,"./JSONS/users_external_accounts.json")

@@ -25,12 +25,12 @@ class SymetricEncryptor:
         return answer
 
     @staticmethod
-    def symetric_decrypt(key, message, nonce, signature):
+    def symetric_decrypt(key, encrypted_message, nonce, signature):
         """Esta funcion desencripta los mensajes recividos desde el servidor"""
-        HMAC.check_encripting_user(key, signature, message)  # Hacer al para que no devuelva el decrypted message
+        HMAC.check_encripting_user(key, signature, encrypted_message)  # Hacer al para que no devuelva el decrypted message
         cipher = Cipher(algorithms.AES(key), modes.CTR(nonce))
         decryptor = cipher.decryptor()
-        decrypted_message = decryptor.update(message) + decryptor.finalize()
+        decrypted_message = decryptor.update(encrypted_message) + decryptor.finalize()
         return decrypted_message
 
 
