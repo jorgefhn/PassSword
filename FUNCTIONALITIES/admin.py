@@ -36,17 +36,7 @@ class Admin:
     def log_in_check_user(self, user_name, user_password):
         try:
             pwderivated = self.users[user_name] #recoge la información cifrada
-            b64_salt = pwderivated[0]
-            b64_key = pwderivated[1]
-
-            print("salt: "+str(b64_salt))
-            print("salt type: "+str(type(b64_salt)))
-
-            b64_salt_bytes = b64_salt.encode("ascii")
-            salt = base64.urlsafe_b64decode(b64_salt_bytes)
-
-            b64_key_bytes = b64_key.encode("ascii")
-            key = base64.urlsafe_b64decode(b64_key_bytes)
+            key, salt = self.extract_password(pwderivated)
 
             if self.password_derivation.password_verification(salt,user_password,key):
                 return [True,self.users]
@@ -59,6 +49,15 @@ class Admin:
         except KeyError:
             #no existe
             return [False,None]
+
+    def extract_password(self, pwderivated):
+        b64_salt = pwderivated[0]
+        b64_key = pwderivated[1]
+        b64_salt_bytes = b64_salt.encode("ascii")
+        salt = base64.urlsafe_b64decode(b64_salt_bytes)
+        b64_key_bytes = b64_key.encode("ascii")
+        key = base64.urlsafe_b64decode(b64_key_bytes)
+        return key, salt
 
     # -------- Esta funcion seria parte del guardar los datos de los usuarios
     def recover_json_information(self, route):
@@ -84,11 +83,12 @@ class Admin:
         app_user = {"App_users": self.users}  # lo actualizas
         self.save_json_information(app_user, "./JSONS/app_users.json")
 
-
-
-
-
-
+    def byte_decoded(self, password_derivated):
+        b64_salt, b64_key = base64.urlsafe_b64encode(password_derivated[0]), base64.urlsafe_b64encode(
+            password_derivated[1])
+        b64_string_salt, b64_string_key = b64_salt.decode("ascii"), b64_key.decode("ascii")
+        b64_string_password = [b64_string_salt, b64_string_key]
+        return b64_string_password
 
     def save_external_account(self, site:str,user:str,site_user:str,password:str,sec_quest:str,notes:str,shared:dict):
         # recuperamos la información antigua del external accounts
