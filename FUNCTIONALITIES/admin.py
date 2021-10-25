@@ -1,12 +1,17 @@
 
 import time
 import json
+from cyber_security import SymetricEncryptor,HMAC,PasswordDerivation
+import base64
 
 
 class Admin:
     def __init__(self):
         self.users = self.recover_json_information("./JSONS/app_users.json")["App_users"]
         self.external_accounts = self.recover_json_information("./JSONS/users_external_accounts.json")
+        self.hmac = HMAC()
+        self.password_derivation = PasswordDerivation()
+        self.symetric_encryptor = SymetricEncryptor()
 
     #versión para diccionario
 
@@ -29,7 +34,20 @@ class Admin:
 
     def log_in_check_user(self, user_name, user_password):
         try:
-            if self.users[user_name] == user_password:
+            pwderivated = self.users[user_name] #recoge la información cifrada
+            b64_salt = pwderivated[0]
+            b64_key = pwderivated[1]
+
+            print("salt: "+str(b64_salt))
+            print("salt type: "+str(type(b64_salt)))
+
+            b64_salt_bytes = b64_salt.encode("ascii")
+            salt = base64.urlsafe_b64decode(b64_salt_bytes)
+
+            b64_key_bytes = b64_key.encode("ascii")
+            key = base64.urlsafe_b64decode(b64_key_bytes)
+
+            if self.password_derivation.password_verification(salt,user_password,key):
                 return [True,self.users]
             print("Error - User not registered!")
             return [False,None]
@@ -48,15 +66,25 @@ class Admin:
 
     def save_json_information(self,dicc:dict,route:str):
         """Auxiliar method to dump a dictionary"""
-        with open(route, "w", encoding="utf-8", newline="") as file:
+        with open(route, "w", newline="") as file:
             json.dump(dicc, file, indent=2) #lo vuelcas
 
 
     def save_users_information(self,user:str,password:str):
-        #app_user_dic = self.recover_json_information("./JSONS/app_users.jsons")#diccionario nuevo que se mete
-        self.users[user] = password #metemos la nueva password
+        #función que deriva la contraseña
+        password_derivated = self.password_derivation.password_derivator(str(password))
+        #convertimos a bytes y luego a string para guardarlo en el json
+        b64_salt,b64_key = base64.urlsafe_b64encode(password_derivated[0]),base64.urlsafe_b64encode(password_derivated[1])
+        b64_string_salt,b64_string_key = b64_salt.decode("ascii"),b64_key.decode("ascii")
+        b64_string_password = [b64_string_salt,b64_string_key]
+        #guardamos contraseña
+        self.users[user] = b64_string_password  # metemos la clave y el salt
         app_user = {"App_users": self.users}  # lo actualizas
-        self.save_json_information(app_user,"./JSONS/app_users.json")
+        self.save_json_information(app_user, "./JSONS/app_users.json")
+
+
+
+
 
 
 
