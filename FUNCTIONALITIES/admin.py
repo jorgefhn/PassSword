@@ -108,7 +108,10 @@ class Admin:
             print("key: "+str(key))
             print("ac: "+str(ac))
 
-            answer = self.symetric_encryptor.symetric_encrypt(key, ac[1])  # en formato de lista, ver si da error
+            #guardamos la info en un str
+            ciph = "User:"+str(ac[0]) + "," + "Password:"+str(ac[1]) + "," + "sec_quest:"+str(ac[2]) + "," + "notes:"+str(ac[3])
+
+            answer = self.symetric_encryptor.symetric_encrypt(key, ciph)  # en formato de lista, ver si da error
             for element in answer:
                 bytes_element =base64.urlsafe_b64encode(element)
                 el = bytes_element.decode("ascii")
@@ -145,7 +148,8 @@ class Admin:
                     signature = base64.urlsafe_b64decode(b64_signature)
 
                     message = self.symetric_encryptor.symetric_decrypt(key,encrypted_message,nonce,signature)
-                    print(site + ":" + str(message))
+                    print(site+":"+str(message.decode()))
+
         except KeyError:
             print(str(user)+": {}")
 
@@ -162,7 +166,6 @@ class Admin:
             s2 = u2[site] #búsqueda del  site 2
             #si llega hasta aquí, correcto
 
-            print("Hasta aquí si que llega")
             self.external_accounts[user2]['shared'] = [site,s1[0]] #se guarda en una lista la info con el sitio y la contraseña
             self.external_accounts[user1]['shared'] = [site,s2[0]] #se guarda en una lista la info con el sitio y la contraseña
 
@@ -178,7 +181,6 @@ class Admin:
         try:
 
             del self.external_accounts[user][site]
-            print(str(self.external_accounts))
             self.save_json_information(self.external_accounts,"./JSONS/users_external_accounts.json")
 
 
