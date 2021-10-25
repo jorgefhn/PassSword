@@ -22,6 +22,9 @@ class Admin:
             print("User already taken, choose another one.")
         except KeyError:
             self.save_users_information(user,password)
+            self.external_accounts[user] = {"shared": {}}
+            self.save_json_information(self.external_accounts,"JSONS/users_external_accounts.json")
+
 
     def add_external_account(self, site:str,app_user:str,user_name: str, password: str):
         try:
@@ -90,13 +93,33 @@ class Admin:
         b64_string_password = [b64_string_salt, b64_string_key]
         return b64_string_password
 
-    def save_external_account(self, site:str,user:str,site_user:str,password:str,sec_quest:str,notes:str,shared:dict):
+    def save_external_account(self, site: str, user: str, site_user: str, password: str, sec_quest: str, notes: str,
+                              shared: dict):
         # recuperamos la información antigua del external accounts
+        ac = [site_user, password, sec_quest, notes]
+        cifr = []
+        # encriptar
+        try:
+            list_key = self.users[user][1]
+            print("list key: "+str(list_key))
+            # decodificamos key y nonce
+            b64_key_bytes = list_key.encode("ascii")
+            key = base64.urlsafe_b64decode(b64_key_bytes)  # key decodificada
+            print("key: "+str(key))
+            print("ac: "+str(ac))
 
-        ac = [site_user,password,sec_quest,notes]
-        self.external_accounts[user][site] = ac  # introduces la nueva info
-        self.external_accounts[user]["shared"] = shared
-        self.save_json_information(self.external_accounts,"./JSONS/users_external_accounts.json")
+            answer = self.symetric_encryptor.symetric_encrypt(key, ac[1])  # en formato de lista, ver si da error
+            for element in answer:
+                bytes_element =base64.urlsafe_b64encode(element)
+                el = bytes_element.decode("ascii")
+                cifr.append(el)#guardamos todos los elementos que devuelve la función encrypt
+
+            self.external_accounts[user][site] = cifr  # introduces la nueva info con el nonce incluido
+            self.external_accounts[user]["shared"] = shared
+            self.save_json_information(self.external_accounts, "./JSONS/users_external_accounts.json")
+
+        except KeyError:
+            print("Error:")
 
 
     def share_password(self,user1:str,user2:str,site:str):

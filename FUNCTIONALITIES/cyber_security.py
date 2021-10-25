@@ -14,7 +14,9 @@ class SymetricEncryptor:
         nonce = os.urandom(16)
         cipher = Cipher(algorithms.AES(key), modes.CTR(nonce))
         encryptor = cipher.encryptor()
+        print("Original message: " + str(message))
         encripted_message = encryptor.update(message.encode()) + encryptor.finalize()
+
         ##Mover aqui el signature
         signature = HMAC.calculate_signature(key, encripted_message) #Aqui calculamos el signature del cifrado
         answer[0] = nonce
@@ -37,7 +39,7 @@ class HMAC:
     @staticmethod
     def calculate_signature(key, uncripted_message):
         h = hmac.HMAC(key, hashes.SHA256())
-        h.update(uncripted_message.encode())  # Este es el mensaje antes de ser cifrado
+        h.update(uncripted_message)  # Este es el mensaje antes de ser cifrado
         signature = h.finalize()              # Esto es lo que se deberia guardar junto al mensaje cifrado
         return signature                      # Tenemos que devolver la signature
 
