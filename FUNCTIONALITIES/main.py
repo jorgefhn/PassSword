@@ -2,31 +2,42 @@ from FUNCTIONALITIES import admin
 import os
 import time
 
+ANSI_RESET = "\u001B[0m";
+ANSI_BLACK = "\u001B[30m";
+ANSI_RED = "\u001B[31m";
+ANSI_GREEN = "\u001B[32m";
+ANSI_YELLOW = "\u001B[33m";
+ANSI_BLUE = "\u001B[34m";
+ANSI_PURPLE = "\u001B[35m";
+ANSI_CYAN = "\u001B[36m";
+ANSI_WHITE = "\u001B[37m";
+
 admin = admin.Admin()
 os.system('cls')
 
-print("Welcome to PassSword!!!\n")
+print("\n"+ANSI_PURPLE+"Welcome to PassSword!!!\n"+ANSI_RESET)
 time.sleep(2)
 
 while True:
     "Bucle que permite la ejecucion hasta que el usuario indique lo contrario"
     #admin.recover_json_information("./JSONS/app_users.json)
     os.system('cls')
-    print("Welcome menu - Choose between actions: \n "
+    print("\n__________________________________________________________")
+    print(ANSI_YELLOW+"Welcome menu - Choose between actions: \n "
           "1) Login \n "
           "2) Sign up\n "
-          "3) Close program")
-    action1 = input("Write down 1, 2 or 3: ")
-
+          "3) Close program"+ANSI_RESET)
+    print("__________________________________________________________")
+    action1 = input(ANSI_PURPLE+"Write down 1, 2 or 3: "+ANSI_RESET)
     # ---------------------- Login functionality -----------------------------
     if action1 == "1":
         os.system('cls')
         #Una vez chekeado que es un usuario registrado
         #pasamos a la interaccion de en el menu principal
-        print("Login Menu - Introduce your user information:")
-        app_user = input("Username: ")
-        app_pass = input("Password: ")
-        input("Please press enter to confirm")
+        print(ANSI_PURPLE+"\nLogin Menu - Introduce your user information:"+ANSI_RESET)
+        app_user = input(ANSI_YELLOW+"Username: ")
+        app_pass = input("Password: "+ANSI_RESET)
+        input(ANSI_RED+"Please press enter to confirm"+ANSI_RESET)
         log_in_ck = admin.log_in_check_user(app_user, app_pass)
         flag = log_in_ck[0]
         user_acc = log_in_ck[1]
@@ -34,40 +45,43 @@ while True:
         if flag:
             while True:
                 os.system('cls')
-                print("Main menu - Choose between actions:\n"
+                print("__________________________________________________________")
+                print(ANSI_YELLOW+"Main menu - Choose between actions:\n"
                       "1) See your passwords\n"
                       "2) Add a new password\n"
                       "3) Modify a password\n"
                       "4) Share a password\n"
                       "5) Delete a password\n"
-                      "6) Close current session")
+                      "6) Close current session"+ANSI_RESET)
+                print("__________________________________________________________")
 
-                action = input("Write down 1, 2, 3, 4, 5 or 6: ")
+                action = input(ANSI_PURPLE+"Write down 1, 2, 3, 4, 5 or 6: "+ANSI_RESET)
 
                 if action == "1":
                     try:
                         print("CONTRASEÑAS GUARDADAS:")
                         admin.show(app_user)
+                        time.sleep(3)
                     except KeyError:
                         admin.external_accounts[app_user] = {"shared": {}}
                         admin.save_json_information(admin.external_accounts,"./JSONS/users_external_accounts.json")
 
                 if action == "2":
                     os.system("cls")
-                    print("Add a new password - Introduce the account information")
-                    acc_site = input("Introduce the site of the account: ")
+                    print(ANSI_PURPLE+"Add a new password - Introduce the account information"+ANSI_RESET)
+                    acc_site = input(ANSI_YELLOW+"Introduce the site of the account: ").upper()
                     acc_user = input("Introduce the user of the account: ")
-                    acc_pass = input("Introduce the password of the account: ")
+                    acc_pass = input("Introduce the password of the account: "+ANSI_RESET)
                     admin.add_external_account(acc_site,app_user,acc_user,acc_pass)
 
                 if action == "3":
                     os.system("cls")
-                    print("Modify info - Introduce the required data")
-                    site = input("Introduce the site/application: ")
+                    print(ANSI_PURPLE+"Modify info - Introduce the required data"+ANSI_RESET)
+                    site = input(ANSI_YELLOW+"Introduce the site/application: ").upper()
                     new_acc_user = input("Introduce the new user: ")
                     new_acc_pass = input("Introduce the new password: ")
                     new_acc_sec_ques = input("Introduce the new security question: ")
-                    new_acc_notes = input("Introduce the new notes: ")
+                    new_acc_notes = input("Introduce the new notes: "+ANSI_RESET)
                     admin.save_external_account(site,
                                                 app_user,
                                                 new_acc_user,
@@ -88,7 +102,7 @@ while True:
                 if action == "5":
                     os.system("cls")
                     print("Delete a password - Introduce the required data")
-                    site = input("Introduce the site/application that you would like to delete: ")
+                    site = input("Introduce the site/application that you would like to delete: ").upper()
                     admin.delete_password(app_user,site)
 
                 if action == "6":
@@ -106,9 +120,9 @@ while True:
     # ---------------------- Sing up functionality -----------------------------
     elif action1 == "2":
         os.system('cls')
-        print("Sign up - New User")
-        app_user = input("Username: ")
-        app_pass = input("Password: ")
+        print(ANSI_PURPLE+"\nSign up - New User"+ANSI_RESET)
+        app_user = input(ANSI_YELLOW+"Username: ")
+        app_pass = input("Password: "+ANSI_RESET)
         admin.add_user(app_user, app_pass)
 
     # ---------------------- Close functionality -----------------------------
