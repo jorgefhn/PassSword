@@ -29,6 +29,7 @@ class Admin:
             a = self.users[user_name]
             print("User already taken, choose another one.")
         except KeyError:
+            self.external_accounts[app_user] = {"shared": {}}
             self.save_external_account(site,app_user,user_name,password,None,None, self.external_accounts[app_user]["shared"])
 
 
@@ -49,9 +50,10 @@ class Admin:
 
             if self.password_derivation.password_verification(salt,user_password,key):
                 return [True,self.users]
+
+
             print("Error - User not registered!")
             return [False,None]
-            #si existe, está bien
 
 
         except KeyError:
