@@ -49,7 +49,7 @@ while True:
                         print(admin.external_accounts[app_user])
                     except KeyError:
                         admin.external_accounts[app_user] = {"shared": {}}
-                        admin.save_json_information(admin.external_accounts,"./JSONS/user_external_accounts.json")
+                        admin.save_json_information(admin.external_accounts,"./JSONS/users_external_accounts.json")
 
                 if action == "2":
                     os.system("cls")
@@ -115,6 +115,7 @@ while True:
         #admin.save_users_information()
         os.system("cls")
         print("Thanks for using PassSword!!")
+
         break
 
     # ---------------------- Input error functionality -----------------------------
