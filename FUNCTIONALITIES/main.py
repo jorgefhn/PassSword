@@ -15,14 +15,19 @@ ANSI_WHITE = "\u001B[37m";
 admin = admin.Admin()
 os.system('cls')
 
-print("\n"+ANSI_PURPLE+"Welcome to PassSword!!!\n"+ANSI_RESET)
+print("\n"+ANSI_PURPLE+"""
+ ____                  ____                              _   ____  
+ |  _ \    __ _   ___  / ___|  __      __   ___    _ __  | | |  _ \ 
+ | |_) |  / _` | / __| \___ \  \ \ /\ / /  / _ \  | '__| | | | | | |
+ |  __/  | (_| | \__ \  ___) |  \ V  V /  | (_) | | |    | | | |_| |
+ |_|      \__,_| |___/ |____/    \_/\_/    \___/  |_|    |_| |____/ 
+                                                                    """+ANSI_RESET)
 time.sleep(2)
 
 while True:
     "Bucle que permite la ejecucion hasta que el usuario indique lo contrario"
     #admin.recover_json_information("./JSONS/app_users.json)
-    os.system('cls')
-    print("\n__________________________________________________________")
+    print("__________________________________________________________")
     print(ANSI_YELLOW+"Welcome menu - Choose between actions: \n "
           "1) Login \n "
           "2) Sign up\n "
@@ -34,10 +39,9 @@ while True:
         os.system('cls')
         #Una vez chekeado que es un usuario registrado
         #pasamos a la interaccion de en el menu principal
-        print(ANSI_PURPLE+"\nLogin Menu - Introduce your user information:"+ANSI_RESET)
-        app_user = input(ANSI_YELLOW+"Username: ")
-        app_pass = input("Password: "+ANSI_RESET)
-        input(ANSI_RED+"Please press enter to confirm"+ANSI_RESET)
+        print(ANSI_PURPLE+"Login Menu - Introduce your user information:"+ANSI_RESET)
+        app_user = input(ANSI_YELLOW+"Username: "+ANSI_RESET).upper()
+        app_pass = input(ANSI_YELLOW+"Password: "+ANSI_RESET)
         log_in_ck = admin.log_in_check_user(app_user, app_pass)
         flag = log_in_ck[0]
         user_acc = log_in_ck[1]
@@ -58,10 +62,13 @@ while True:
                 action = input(ANSI_PURPLE+"Write down 1, 2, 3, 4, 5 or 6: "+ANSI_RESET)
 
                 if action == "1":
+                    os.system('cls')
                     try:
                         print("CONTRASEÑAS GUARDADAS:")
+                        print("__________________________________________________________")
                         admin.show(app_user)
-                        time.sleep(3)
+                        print("__________________________________________________________")
+                        input(ANSI_RED+"Presiona cualquier tecla para continuar: "+ANSI_RESET)
                     except KeyError:
                         admin.external_accounts[app_user] = {"shared": {}}
                         admin.save_json_information(admin.external_accounts,"./JSONS/users_external_accounts.json")
@@ -90,22 +97,21 @@ while True:
                                                 new_acc_notes,
                                                 admin.external_accounts[app_user]['shared'])
 
-
                 if action == "4":
                     os.system("cls")
-                    print("Share a password - Introduce the required data")
-                    receiving_user = input("Introduce the user which you will like to share your account: ")
-                    site_to_share = input("Introduce the site of the account you want to share: ")
+                    print(ANSI_PURPLE+"Share a password - Introduce the required data"+ANSI_RESET)
+                    receiving_user = input(ANSI_YELLOW+"Introduce the user which you will like to share your account: ")
+                    site_to_share = input("Introduce the site of the account you want to share: "+ANSI_RESET)
                     admin.share_password(app_user,receiving_user,site_to_share)
-
 
                 if action == "5":
                     os.system("cls")
-                    print("Delete a password - Introduce the required data")
-                    site = input("Introduce the site/application that you would like to delete: ").upper()
+                    print(ANSI_PURPLE+"Delete a password - Introduce the required data"+ANSI_RESET)
+                    site = input(ANSI_YELLOW+"Introduce the site/application that you would like to delete: "+ANSI_YELLOW).upper()
                     admin.delete_password(app_user,site)
 
                 if action == "6":
+                    os.system('cls')
 
                     break
 
@@ -121,7 +127,7 @@ while True:
     elif action1 == "2":
         os.system('cls')
         print(ANSI_PURPLE+"\nSign up - New User"+ANSI_RESET)
-        app_user = input(ANSI_YELLOW+"Username: ")
+        app_user = input(ANSI_YELLOW+"Username: ").upper()
         app_pass = input("Password: "+ANSI_RESET)
         admin.add_user(app_user, app_pass)
 

@@ -163,7 +163,6 @@ class Admin:
                             print("\t"+ANSI_CYAN+characters +ANSI_RESET)
                             characters = ''
 
-
         except KeyError:
             print(str(user)+": {}")
 

@@ -1,31 +1,10 @@
 {
-  "augusto": {
-    "shared": {},
-    "netfl": [
-      "18f3F4hjsyAdcS-a_Fr6qQ==",
-      "xeSodYV5Lpg4zSW4kA==",
-      "LgC1fjytNuFZcd9pXUNPqvtWCI4nIN6OcU3leFNTiC8="
-    ]
-  },
-  "jorge": {
-    "shared": {},
-    "netflix": [
-      "hM4phow-ljqP0-wEtmdxQQ==",
-      "J1qBB1uPdToOP4zpYSthpjuublNuISuOje0bynNHAT6L_L2ohBPAzV4Rkevo8fC8eRkKLAI=",
-      "SslQF5vzYNdvq6vsHuKC0b_U0vcp4BqCVASJhK-fYcY="
-    ]
-  },
-  "marce": {
+  "MARCE": {
     "shared": {},
     "NETFLIX": [
-      "Tj9bmbmZfStPyVCDX36xBg==",
-      "LZwfripZJmijxtUpzuao7QyLqTechcBqmwd7DHUPMFP3ldw4P9lTIhHbMJjiX2qVMFrqCWUL",
-      "Ly-__TGD-dZu1xMhz0S6ghnxu4CAj5D7Dnr3Aj6Bjoc="
-    ],
-    "DISNEY": [
-      "StQvQhJnHi_XUnQU5jME3Q==",
-      "TfL3vON3ueyWFJBHTyzxSOrL4aBM6KMAnqxiorQn8bD1lBO2v8V0fz0Ky97vBjxLq8HANxd0F2A=",
-      "-E91GrtYvQzr_2WNs20hj_cksgMvvzqsvSh9CpJqEUs="
+      "-i0dsZ13fguyw2SY0tCowA==",
+      "h9CMozTtqVY0UNuRwyTuwSmIec7_gX_WtkffjzOHmd8mHECymAsMAYKO0St4y0GN4oTq8wqyzxNA1bc=",
+      "4_QMgFMAMqiLNXbxZKDcL6_-aZRo8cck-4DBE60-sMw="
     ]
   }
 }
