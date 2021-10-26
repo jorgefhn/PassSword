@@ -4,15 +4,6 @@ import json
 from cyber_security import SymetricEncryptor,HMAC,PasswordDerivation
 import base64
 
-ANSI_RESET = "\u001B[0m";
-ANSI_BLACK = "\u001B[30m";
-ANSI_RED = "\u001B[31m";
-ANSI_GREEN = "\u001B[32m";
-ANSI_YELLOW = "\u001B[33m";
-ANSI_BLUE = "\u001B[34m";
-ANSI_PURPLE = "\u001B[35m";
-ANSI_CYAN = "\u001B[36m";
-ANSI_WHITE = "\u001B[37m";
 
 class Admin:
     def __init__(self):
@@ -27,7 +18,7 @@ class Admin:
     def add_user(self,user:str, password:str):
         try:
             # Si no hay error es que el usuario existe y por ello imprimimos el mensaje
-            self.users[user]
+            a = self.users[user]
             print("User already taken, choose another one.")
         except KeyError:
             self.save_users_information(user,password)
@@ -38,7 +29,7 @@ class Admin:
     def add_external_account(self, site:str,app_user:str,user_name: str, password: str):
         try:
             # Si no hay error es que el usuario existe y por ello imprimimos el mensaje
-            self.users[user_name]
+            a = self.users[user_name]
             print("User already taken, choose another one.")
         except KeyError:
             self.external_accounts[app_user] = {"shared": {}}
@@ -110,10 +101,10 @@ class Admin:
         # encriptar
         try:
             list_key = self.users[user][1]
-
             # decodificamos key y nonce
             b64_key_bytes = list_key.encode("ascii")
             key = base64.urlsafe_b64decode(b64_key_bytes)  # key decodificada
+
 
             #guardamos la info en un str
             ciph = "User:"+str(ac[0]) + "," + "Password:"+str(ac[1]) + "," + "sec_quest:"+str(ac[2]) + "," + "notes:"+str(ac[3])
@@ -124,17 +115,17 @@ class Admin:
                 el = bytes_element.decode("ascii")
                 cifr.append(el)#guardamos todos los elementos que devuelve la función encrypt
 
-            json_external_accounts = self.recover_json_information("./JSONS/users_external_accounts.json")
-            json_external_accounts[user][site] = cifr
-            self.save_json_information(json_external_accounts, "./JSONS/users_external_accounts.json")
+            self.external_accounts[user][site] = cifr  # introduces la nueva info con el nonce incluido
+            self.external_accounts[user]["shared"] = shared
+            self.save_json_information(self.external_accounts, "./JSONS/users_external_accounts.json")
 
         except KeyError:
-            print(ANSI_RED+"Error: unable to save account"+ANSI_RESET)
+            print("Error:")
 
 
     def show(self, user:str):
         try:
-            user_sites = self.recover_json_information("./JSONS/users_external_accounts.json")[user]
+            user_sites = self.external_accounts[user]
             key = self.users[user][1]
 
             b64_key = key.encode("ascii")  # Recuperamos los bytes de los strings, se codifican
@@ -155,13 +146,7 @@ class Admin:
                     signature = base64.urlsafe_b64decode(b64_signature)
 
                     message = self.symetric_encryptor.symetric_decrypt(key,encrypted_message,nonce,signature)
-                    print(ANSI_RED+site+":"+ANSI_RESET)
-                    characters = ''
-                    for i in message.decode():
-                        characters += i
-                        if i == ",":
-                            print("\t"+ANSI_CYAN+characters +ANSI_RESET)
-                            characters = ''
+                    print(site+":"+str(message.decode()))
 
         except KeyError:
             print(str(user)+": {}")
@@ -172,34 +157,33 @@ class Admin:
     def share_password(self,user1:str,user2:str,site:str):
         """método para que user1 le comparta a user2 la contraseña de site"""
         try:
-            json_external_accounts = self.recover_json_information("./JSONS/users_external_accounts.json")
-
-            u1 = json_external_accounts[user1] #comprobamos que el usuario que va a compartir está registrado en external_accounts
-            u2 = json_external_accounts[user2] #comprobamos que el usuario que va a compartir está registrado en external_accounts
+            u1 = self.external_accounts[user1] #comprobamos que el usuario que va a compartir está registrado en external_accounts
+            u2 = self.external_accounts[user2] #comprobamos que el usuario que va a compartir está registrado en external_accounts
             #si lo está, comprobamos que el site es correcto
             s1 = u1[site] #búsqueda del  site 1
             s2 = u2[site] #búsqueda del  site 2
             #si llega hasta aquí, correcto
 
-            json_external_accounts[user2]['shared'] = [site,s1[0]] #se guarda en una lista la info con el sitio y la contraseña
-            json_external_accounts[user1]['shared'] = [site,s2[0]] #se guarda en una lista la info con el sitio y la contraseña
+            self.external_accounts[user2]['shared'] = [site,s1[0]] #se guarda en una lista la info con el sitio y la contraseña
+            self.external_accounts[user1]['shared'] = [site,s2[0]] #se guarda en una lista la info con el sitio y la contraseña
 
-            self.save_json_information(json_external_accounts,"./JSONS/users_external_accounts.json")
+            print(self.external_accounts)
+            self.save_json_information(self.external_accounts,"./JSONS/users_external_accounts.json")
 
 
         except KeyError: #si no ha encontrado alguno de los dos sites de los usuarios emisor y receptor
-            print(ANSI_RED+"Error: unable to share password"+ANSI_RESET)
+            print("Error al compartir contraseña")
 
     def delete_password(self, user:str,site:str):
         """método para borrar el site de user"""
         try:
-            json_external_accounts = self.recover_json_information("./JSONS/users_external_accounts.json")
-            del json_external_accounts[user][site]
-            self.save_json_information(json_external_accounts,"./JSONS/users_external_accounts.json")
+
+            del self.external_accounts[user][site]
+            self.save_json_information(self.external_accounts,"./JSONS/users_external_accounts.json")
 
 
         except KeyError:
-            print(ANSI_RED+"Error: site not found"+ANSI_RESET)
+            print("Usuario no contenía el site")
 
 
 
