@@ -135,7 +135,7 @@ while True:
     elif action1 == "3":
         #admin.save_users_information()
         os.system("cls")
-        print("Thanks for using PassSword!!")
+        print("Thanks for using PassSworld!!")
 
         break
 

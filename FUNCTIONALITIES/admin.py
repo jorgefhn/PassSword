@@ -38,7 +38,8 @@ class Admin:
     def add_external_account(self, site:str,app_user:str,user_name: str, password: str):
         try:
             # Si no hay error es que el usuario existe y por ello imprimimos el mensaje
-            self.users[user_name]
+            json_app_users = self.recover_json_information("JSONS/app_users.json")
+            json_app_users[user_name]
             print("User already taken, choose another one.")
         except KeyError:
             self.external_accounts[app_user] = {"shared": {}}
@@ -165,9 +166,6 @@ class Admin:
 
         except KeyError:
             print(str(user)+": {}")
-
-
-
 
     def share_password(self,user1:str,user2:str,site:str):
         """método para que user1 le comparta a user2 la contraseña de site"""
