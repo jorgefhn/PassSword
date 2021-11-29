@@ -2,7 +2,7 @@
 import time
 import json
 from cyber_security import SymetricEncryptor,HMAC,PasswordDerivation
-from cyber_security2 import generate_RSA_keys, asymetric_encrypt,load_public_key,asymetric_decrypt
+from cyber_security2 import generate_RSA_keys, asymetric_encrypt,load_public_key,asymetric_decrypt,load_private_key
 import base64
 
 
@@ -182,32 +182,51 @@ class Admin:
             key = self.users[user1][1]
 
             b64_key = key.encode("ascii")  # Recuperamos los bytes de los strings, se codifican
-            key = base64.urlsafe_b64decode(b64_key)  #-
+            key = base64.urlsafe_b64decode(b64_key)
 
-            list = []
             message = self.decrypt_message(key, site, user_sites)
-            """characters = ''
-            for i in message.decode():
-                characters += i
-                if i == ",":
-                    list.append(characters)
-                    characters = ''"""
 
             public_key = load_public_key(user2)
             print(public_key)
 
+            print("mensaje: "+str(message.decode()))
             encrypted_message = asymetric_encrypt(message.decode(), public_key)
 
-            a = encrypted_message[0]
+            #serializamos encryptedMessage2
+            l = []
+            for el in encrypted_message:
+                l.append(el.decode('iso8859-1'))
 
             shared_accounts[user1]["shared_with_other"].append(site)
-            shared_accounts[user2]['shared_with_me'][site] = a.decode('iso8859-1')#se guarda en una lista la info con el sitio y la contraseña
+            shared_accounts[user2]['shared_with_me'][site] =l #se guarda en una lista la info con el sitio y la contraseña
+
 
             self.save_json_information(json_external_accounts, "./JSONS/users_external_accounts.json")
             self.save_json_information(shared_accounts, "./JSONS/shared_accounts.json")
 
+
+            #probamos a desencriptar
+            shared = self.recover_json_information("./JSONS/shared_accounts.json")[user2]['shared_with_me'][site]
+            print(shared)
+            l2 = []
+            for e in shared:
+                l2.append(e.encode('iso8859'))
+
+            key2 = load_private_key(user2)
+            new_string= ""
+            mes = asymetric_decrypt(l2, key2)
+            mensaje_desencriptado = new_string.join(mes)
+            print("mensaje desencriptado: " + str(mensaje_desencriptado))
+
+            #falta la funcionalidad de visualizar lo desencriptado
+
+
+
         except KeyError: #si no ha encontrado alguno de los dos sites de los usuarios emisor y receptor
             print(ANSI_RED+"Error: unable to share password"+ANSI_RESET)
+
+
+
 
     def delete_password(self, user:str,site:str):
         """método para borrar el site de user"""
