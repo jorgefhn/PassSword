@@ -71,7 +71,7 @@ def generate_public_key_certificate(user):
     """
     serial = load_serial_certificate()
     print("Serial num: " + serial)
-    command = "cp ./nuevoscerts/" + serial + ".pem " + " ../RSA_keys/PBKC_" + user + ".pem"
+    command = "copy .\\nuevoscerts\\" + serial + ".pem " + " ..\RSA_keys\PBKC_" + user + ".pem"
     print(command)
 
     os.system(command)
@@ -120,7 +120,7 @@ def asymetric_encrypt(user_information, public_key):
     encrypted_info = []
     for information in user_information:
         ciphertext = public_key.encrypt(
-            information.encode(),
+            information.encode('iso8859-1'),
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),

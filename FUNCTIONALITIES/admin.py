@@ -2,8 +2,9 @@
 import time
 import json
 from cyber_security import SymetricEncryptor,HMAC,PasswordDerivation
-from cyber_security2 import generate_RSA_keys
+from cyber_security2 import generate_RSA_keys, asymetric_encrypt,load_public_key,asymetric_decrypt
 import base64
+
 
 ANSI_RESET = "\u001B[0m";
 ANSI_BLACK = "\u001B[30m";
@@ -94,7 +95,7 @@ class Admin:
         #convertimos a bytes y luego a string para guardarlo en el json
         b64_salt, b64_key = base64.urlsafe_b64encode(password_derivated[0]), base64.urlsafe_b64encode(password_derivated[1])
         b64_string_salt, b64_string_key = b64_salt.decode("ascii"),b64_key.decode("ascii")
-        self.users[user] = [b64_string_salt, b64_string_key, 0, 0]
+        self.users[user] = [b64_string_salt, b64_string_key]
         self.save_json_information(self.users, "./JSONS/app_users.json")
 
     def byte_decoded(self, password_derivated):
@@ -142,19 +143,7 @@ class Admin:
 
             for site in user_sites:
                 if site != "shared_with_me":
-                    nonce = user_sites[site][0]
-                    b64_nonce = nonce.encode("ascii")
-                    nonce = base64.urlsafe_b64decode(b64_nonce)
-
-                    encrypted_message = user_sites[site][1]
-                    b64_encrypted_message = encrypted_message.encode("ascii")
-                    encrypted_message = base64.urlsafe_b64decode(b64_encrypted_message)
-
-                    signature = user_sites[site][2]
-                    b64_signature = signature.encode("ascii")
-                    signature = base64.urlsafe_b64decode(b64_signature)
-
-                    message = self.symetric_encryptor.symetric_decrypt(key,encrypted_message,nonce,signature)
+                    message = self.decrypt_message(key, site, user_sites)
                     print(ANSI_RED+site+":"+ANSI_RESET)
                     characters = ''
                     for i in message.decode():
@@ -166,6 +155,19 @@ class Admin:
         except KeyError:
             print(str(user)+": {}")
 
+    def decrypt_message(self, key, site, user_sites):
+        nonce = user_sites[site][0]
+        b64_nonce = nonce.encode("ascii")
+        nonce = base64.urlsafe_b64decode(b64_nonce)
+        encrypted_message = user_sites[site][1]
+        b64_encrypted_message = encrypted_message.encode("ascii")
+        encrypted_message = base64.urlsafe_b64decode(b64_encrypted_message)
+        signature = user_sites[site][2]
+        b64_signature = signature.encode("ascii")
+        signature = base64.urlsafe_b64decode(b64_signature)
+        message = self.symetric_encryptor.symetric_decrypt(key, encrypted_message, nonce, signature)
+        return message
+
     def share_password(self, user1:str, user2:str, site:str):
         """método para que user1 le comparta a user2 la contraseña de site"""
 
@@ -176,11 +178,30 @@ class Admin:
             u1 = json_external_accounts[user1] #comprobamos que el usuario que va a compartir está registrado en external_accounts
             u2 = json_external_accounts[user2] #comprobamos que el usuario que va a compartir está registrado en external_accounts
 
-            #si lo está, comprobamos que el site es correcto
-            s1 = u1[site] #búsqueda del  site 1
+            user_sites = json_external_accounts[user1]
+            key = self.users[user1][1]
+
+            b64_key = key.encode("ascii")  # Recuperamos los bytes de los strings, se codifican
+            key = base64.urlsafe_b64decode(b64_key)  #
+
+            list = []
+            message = self.decrypt_message(key, site, user_sites)
+            """characters = ''
+            for i in message.decode():
+                characters += i
+                if i == ",":
+                    list.append(characters)
+                    characters = ''"""
+
+            public_key = load_public_key(user2)
+            print(public_key)
+
+            encrypted_message = asymetric_encrypt(message.decode(), public_key)
+
+            a = encrypted_message[0]
 
             shared_accounts[user1]["shared_with_other"].append(site)
-            shared_accounts[user2]['shared_with_me'][site] = s1 #se guarda en una lista la info con el sitio y la contraseña
+            shared_accounts[user2]['shared_with_me'][site] = a.decode('iso8859-1')#se guarda en una lista la info con el sitio y la contraseña
 
             self.save_json_information(json_external_accounts, "./JSONS/users_external_accounts.json")
             self.save_json_information(shared_accounts, "./JSONS/shared_accounts.json")
