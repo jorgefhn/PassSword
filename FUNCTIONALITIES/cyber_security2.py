@@ -60,7 +60,7 @@ def generate_public_key_certificate(user):
     request = "csr_" + str(user) + ".pem"
     print(request)
     os.chdir("./AC")
-    # os.system("openssl ca -in ./solicitudes/" + request + " -notext -config ./openssl_AC.cnf")
+    # os.system("openssl ca -in ./solicitudes/" + request + " -notext -config ./openssl_AC.cnf").
     os.system("openssl ca -batch -passin pass:" + PASSPHRASE + " -in ./solicitudes/" + request + " -notext -config ./openssl_AC.cnf")
     """
     time.sleep(0.2)

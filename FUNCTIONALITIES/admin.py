@@ -182,7 +182,7 @@ class Admin:
             key = self.users[user1][1]
 
             b64_key = key.encode("ascii")  # Recuperamos los bytes de los strings, se codifican
-            key = base64.urlsafe_b64decode(b64_key)  #
+            key = base64.urlsafe_b64decode(b64_key)  #-
 
             list = []
             message = self.decrypt_message(key, site, user_sites)
