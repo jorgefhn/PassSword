@@ -63,15 +63,11 @@ while True:
 
                 if action == "1":
                     os.system('cls')
-                    try:
-                        print("CONTRASEÑAS GUARDADAS:")
-                        print("__________________________________________________________")
-                        admin.show(app_user)
-                        print("__________________________________________________________")
-                        input(ANSI_RED+"Presiona cualquier tecla para continuar: "+ANSI_RESET)
-                    except KeyError:
-                        admin.external_accounts[app_user] = {"shared": {}}
-                        admin.save_json_information(admin.external_accounts,"./JSONS/users_external_accounts.json")
+                    print("CONTRASEÑAS GUARDADAS:")
+                    print("__________________________________________________________")
+                    admin.show(app_user)
+                    print("__________________________________________________________")
+                    input(ANSI_RED+"Presiona cualquier tecla para continuar: "+ANSI_RESET)
 
                 if action == "2":
                     os.system("cls")
@@ -79,14 +75,32 @@ while True:
                     acc_site = input(ANSI_YELLOW+"Introduce the site of the account: ").upper()
                     acc_user = input("Introduce the user of the account: ")
                     acc_pass = input("Introduce the password of the account: "+ANSI_RESET)
-                    admin.add_external_account(acc_site,app_user,acc_user,acc_pass)
+                    admin.add_external_account(acc_site, app_user, acc_user, acc_pass)
+                    input(ANSI_RED + "Presiona cualquier tecla para continuar: " + ANSI_RESET)
+
 
                 if action == "3":
                     os.system("cls")
+                    print("CONTRASEÑAS GUARDADAS:")
+                    print("__________________________________________________________")
+                    admin.show(app_user)
+                    print("__________________________________________________________")
                     print(ANSI_PURPLE+"Modify info - Introduce the required data"+ANSI_RESET)
                     site = input(ANSI_YELLOW+"Introduce the site/application: ").upper()
+                    while site == '':
+                        print("The site can not be empty")
+                        site = input(ANSI_YELLOW + "Introduce the site/application: ").upper()
+
                     new_acc_user = input("Introduce the new user: ")
+                    while new_acc_user == '':
+                        print("The user can not be empty")
+                        new_acc_user = input("Introduce the new user: ")
+
                     new_acc_pass = input("Introduce the new password: ")
+                    while new_acc_pass == '':
+                        print("The password can not be empty")
+                        new_acc_user = input("Introduce the new password: ")
+
                     new_acc_sec_ques = input("Introduce the new security question: ")
                     new_acc_notes = input("Introduce the new notes: "+ANSI_RESET)
                     admin.save_external_account(site,
@@ -94,18 +108,22 @@ while True:
                                                 new_acc_user,
                                                 new_acc_pass,
                                                 new_acc_sec_ques,
-                                                new_acc_notes,
-                                                admin.external_accounts[app_user]['shared'])
+                                                new_acc_notes)
 
                 if action == "4":
                     os.system("cls")
                     print(ANSI_PURPLE+"Share a password - Introduce the required data"+ANSI_RESET)
-                    receiving_user = input(ANSI_YELLOW+"Introduce the user which you will like to share your account: ")
-                    site_to_share = input("Introduce the site of the account you want to share: "+ANSI_RESET)
-                    admin.share_password(app_user,receiving_user,site_to_share)
+                    receiving_user = input(ANSI_YELLOW+"Introduce the user which you will like to share your account: ").upper()
+                    site_to_share = input("Introduce the site of the account you want to share: "+ANSI_RESET).upper()
+                    admin.share_password(app_user, receiving_user, site_to_share)
+                    input(ANSI_RED+"Presiona cualquier tecla para continuar: "+ANSI_RESET)
 
                 if action == "5":
                     os.system("cls")
+                    print("CONTRASEÑAS GUARDADAS:")
+                    print("__________________________________________________________")
+                    admin.show(app_user)
+                    print("__________________________________________________________")
                     print(ANSI_PURPLE+"Delete a password - Introduce the required data"+ANSI_RESET)
                     site = input(ANSI_YELLOW+"Introduce the site/application that you would like to delete: "+ANSI_YELLOW).upper()
                     admin.delete_password(app_user,site)
@@ -140,6 +158,11 @@ while True:
         break
 
     # ---------------------- Input error functionality -----------------------------
+    elif action1 == "4":
+        #PARA RESETAR LOS JSON, HACE FALTA CERRAR EL PROGRAMA UNA VEZ SELECCIONADA ESTA OPCION
+        admin.save_json_information({}, "./JSONS/app_users.json")
+        admin.save_json_information({}, "./JSONS/users_external_accounts.json")
+        admin.save_json_information({}, "./JSONS/shared_accounts.json")
 
     else:
         print("Error: action not possible")
