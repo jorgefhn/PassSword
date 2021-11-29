@@ -15,6 +15,7 @@ ANSI_BLUE = "\u001B[34m";
 ANSI_PURPLE = "\u001B[35m";
 ANSI_CYAN = "\u001B[36m";
 ANSI_WHITE = "\u001B[37m";
+TAB = '\t'*7
 
 class Admin:
     def __init__(self):
@@ -139,7 +140,7 @@ class Admin:
                 user_sites = self.recover_json_information("./JSONS/shared_accounts.json")[user]['shared_with_other']
 
                 for site in user_sites:
-                    print(ANSI_RED + site + ANSI_RESET)
+                    print(TAB + ANSI_RED + site + ANSI_RESET)
 
             elif option == 'shared_wme':
                 user_sites = self.recover_json_information("./JSONS/shared_accounts.json")[user]['shared_with_me']
@@ -153,12 +154,12 @@ class Admin:
                     new_string = ""
                     mes = asymetric_decrypt(l2, key2)
                     message = new_string.join(mes)
-                    print(ANSI_RED + site + ":" + ANSI_RESET)
+                    print(TAB + ANSI_RED + site + ":" + ANSI_RESET)
                     characters = ''
                     for i in message:
                         characters += i
                         if i == ",":
-                            print("\t" + ANSI_CYAN + characters + ANSI_RESET)
+                            print(TAB + "\t" + ANSI_CYAN + characters + ANSI_RESET)
                             characters = ''
                     l2 = []
             else:
@@ -172,13 +173,14 @@ class Admin:
                 for site in user_sites:
 
                     message = self.decrypt_message(key, site, user_sites).decode()
-                    print(ANSI_RED+site+":"+ANSI_RESET)
+                    print(TAB + ANSI_RED + site + ":" + ANSI_RESET)
                     characters = ''
                     for i in message:
                         characters += i
                         if i == ",":
-                            print("\t"+ANSI_CYAN+characters +ANSI_RESET)
+                            print(TAB  + ANSI_CYAN + characters + ANSI_RESET)
                             characters = ''
+                    print(TAB + "__________________________________________________________")
 
         except KeyError:
             print(str(user)+": {}")
@@ -237,7 +239,7 @@ class Admin:
             self.save_json_information(shared_accounts, "./JSONS/shared_accounts.json")
 
         except KeyError: #si no ha encontrado alguno de los dos sites de los usuarios emisor y receptor
-            print(ANSI_RED+"Error: unable to share password"+ANSI_RESET)
+            print(TAB + ANSI_RED+"Error: unable to share password"+ANSI_RESET)
 
 
 
