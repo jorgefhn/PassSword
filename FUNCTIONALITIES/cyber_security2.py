@@ -58,7 +58,7 @@ def generate_CSR(user):
 
 def generate_public_key_certificate(user):
     request = "csr_" + str(user) + ".pem"
-    print(request)
+    #print(request)
     os.chdir("./AC")
     # os.system("openssl ca -in ./solicitudes/" + request + " -notext -config ./openssl_AC.cnf").
     os.system("openssl ca -batch -passin pass:" + PASSPHRASE + " -in ./solicitudes/" + request + " -notext -config ./openssl_AC.cnf")
@@ -70,9 +70,9 @@ def generate_public_key_certificate(user):
     os.write(0, "y")
     """
     serial = load_serial_certificate()
-    print("Serial num: " + serial)
+    #print("Serial num: " + serial)
     command = "copy .\\nuevoscerts\\" + serial + ".pem " + " ..\RSA_keys\PBKC_" + user + ".pem"
-    print(command)
+    #print(command)
 
     os.system(command)
     os.chdir("..")

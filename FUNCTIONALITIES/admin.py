@@ -132,21 +132,49 @@ class Admin:
         except KeyError:
             print(ANSI_RED+"Error: unable to save account"+ANSI_RESET)
 
+    def show(self, user: str, option):
 
-    def show(self, user:str):
         try:
-            user_sites = self.recover_json_information("./JSONS/users_external_accounts.json")[user]
-            key = self.users[user][1]
+            if option == 'shared_woth':
+                user_sites = self.recover_json_information("./JSONS/shared_accounts.json")[user]['shared_with_other']
 
-            b64_key = key.encode("ascii")  # Recuperamos los bytes de los strings, se codifican
-            key = base64.urlsafe_b64decode(b64_key)  #
+                for site in user_sites:
+                    print(ANSI_RED + site + ANSI_RESET)
 
-            for site in user_sites:
-                if site != "shared_with_me":
-                    message = self.decrypt_message(key, site, user_sites)
+            elif option == 'shared_wme':
+                user_sites = self.recover_json_information("./JSONS/shared_accounts.json")[user]['shared_with_me']
+                l2 = []
+                for site in user_sites:
+                    for field in user_sites[site]:
+                        l2.append(field.encode('iso8859'))
+
+                    key2 = load_private_key(user)
+
+                    new_string = ""
+                    mes = asymetric_decrypt(l2, key2)
+                    message = new_string.join(mes)
+                    print(ANSI_RED + site + ":" + ANSI_RESET)
+                    characters = ''
+                    for i in message:
+                        characters += i
+                        if i == ",":
+                            print("\t" + ANSI_CYAN + characters + ANSI_RESET)
+                            characters = ''
+                    l2 = []
+            else:
+                user_sites = self.recover_json_information("./JSONS/users_external_accounts.json")[user]
+
+                key = self.users[user][1]
+
+                b64_key = key.encode("ascii")  # Recuperamos los bytes de los strings, se codifican
+                key = base64.urlsafe_b64decode(b64_key)  #
+
+                for site in user_sites:
+
+                    message = self.decrypt_message(key, site, user_sites).decode()
                     print(ANSI_RED+site+":"+ANSI_RESET)
                     characters = ''
-                    for i in message.decode():
+                    for i in message:
                         characters += i
                         if i == ",":
                             print("\t"+ANSI_CYAN+characters +ANSI_RESET)
@@ -185,46 +213,31 @@ class Admin:
             key = base64.urlsafe_b64decode(b64_key)
 
             message = self.decrypt_message(key, site, user_sites)
+            lista = []
+            characters = ''
+            for i in message.decode():
+                characters += i
+                if i == ",":
+                    lista.append(characters)
+                    characters = ''
 
             public_key = load_public_key(user2)
-            print(public_key)
 
-            print("mensaje: "+str(message.decode()))
-            encrypted_message = asymetric_encrypt(message.decode(), public_key)
+            encrypted_message = asymetric_encrypt(lista, public_key)
 
             #serializamos encryptedMessage2
-            l = []
+            lista = []
             for el in encrypted_message:
-                l.append(el.decode('iso8859-1'))
+                lista.append(el.decode('iso8859-1'))
 
             shared_accounts[user1]["shared_with_other"].append(site)
-            shared_accounts[user2]['shared_with_me'][site] =l #se guarda en una lista la info con el sitio y la contraseña
-
+            shared_accounts[user2]['shared_with_me'][site] = lista  # se guarda en una lista la info con el sitio y la contraseña
 
             self.save_json_information(json_external_accounts, "./JSONS/users_external_accounts.json")
             self.save_json_information(shared_accounts, "./JSONS/shared_accounts.json")
 
-
-            #probamos a desencriptar
-            shared = self.recover_json_information("./JSONS/shared_accounts.json")[user2]['shared_with_me'][site]
-            print(shared)
-            l2 = []
-            for e in shared:
-                l2.append(e.encode('iso8859'))
-
-            key2 = load_private_key(user2)
-            new_string= ""
-            mes = asymetric_decrypt(l2, key2)
-            mensaje_desencriptado = new_string.join(mes)
-            print("mensaje desencriptado: " + str(mensaje_desencriptado))
-
-            #falta la funcionalidad de visualizar lo desencriptado
-
-
-
         except KeyError: #si no ha encontrado alguno de los dos sites de los usuarios emisor y receptor
             print(ANSI_RED+"Error: unable to share password"+ANSI_RESET)
-
 
 
 
@@ -238,9 +251,6 @@ class Admin:
 
         except KeyError:
             print(ANSI_RED+"Error: site not found"+ANSI_RESET)
-
-
-
 
 
 

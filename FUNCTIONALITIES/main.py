@@ -25,6 +25,7 @@ print("\n"+ANSI_PURPLE+"""
 time.sleep(2)
 
 while True:
+
     "Bucle que permite la ejecucion hasta que el usuario indique lo contrario"
     #admin.recover_json_information("./JSONS/app_users.json)
     print("__________________________________________________________")
@@ -56,7 +57,9 @@ while True:
                       "3) Modify a password\n"
                       "4) Share a password\n"
                       "5) Delete a password\n"
-                      "6) Close current session"+ANSI_RESET)
+                      "6) Show shared passwords with other\n"
+                      "7) Show shared passwords with me\n"
+                      "8) Close current session"+ANSI_RESET)
                 print("__________________________________________________________")
 
                 action = input(ANSI_PURPLE+"Write down 1, 2, 3, 4, 5 or 6: "+ANSI_RESET)
@@ -65,7 +68,7 @@ while True:
                     os.system('cls')
                     print("CONTRASEÑAS GUARDADAS:")
                     print("__________________________________________________________")
-                    admin.show(app_user)
+                    admin.show(app_user, 'external')
                     print("__________________________________________________________")
                     input(ANSI_RED+"Presiona cualquier tecla para continuar: "+ANSI_RESET)
 
@@ -83,7 +86,7 @@ while True:
                     os.system("cls")
                     print("CONTRASEÑAS GUARDADAS:")
                     print("__________________________________________________________")
-                    admin.show(app_user)
+                    admin.show(app_user, 'external')
                     print("__________________________________________________________")
                     print(ANSI_PURPLE+"Modify info - Introduce the required data"+ANSI_RESET)
                     site = input(ANSI_YELLOW+"Introduce the site/application: ").upper()
@@ -115,6 +118,11 @@ while True:
                     print(ANSI_PURPLE+"Share a password - Introduce the required data"+ANSI_RESET)
                     receiving_user = input(ANSI_YELLOW+"Introduce the user which you will like to share your account: ").upper()
                     site_to_share = input("Introduce the site of the account you want to share: "+ANSI_RESET).upper()
+                    user_sites = admin.recover_json_information("./JSONS/shared_accounts.json")[app_user]['shared_with_other']
+                    while site_to_share in user_sites:
+                        print(ANSI_RED+"The site password is already shared "+ANSI_RESET)
+                        site_to_share = input(
+                            "Introduce the site of the account you want to share: " + ANSI_RESET).upper()
                     admin.share_password(app_user, receiving_user, site_to_share)
                     input(ANSI_RED+"Presiona cualquier tecla para continuar: "+ANSI_RESET)
 
@@ -122,13 +130,29 @@ while True:
                     os.system("cls")
                     print("CONTRASEÑAS GUARDADAS:")
                     print("__________________________________________________________")
-                    admin.show(app_user)
+                    admin.show(app_user, 'external')
                     print("__________________________________________________________")
                     print(ANSI_PURPLE+"Delete a password - Introduce the required data"+ANSI_RESET)
                     site = input(ANSI_YELLOW+"Introduce the site/application that you would like to delete: "+ANSI_YELLOW).upper()
                     admin.delete_password(app_user,site)
 
                 if action == "6":
+                    os.system("cls")
+                    print("CONTRASEÑAS QUE COMPARTO:")
+                    print("__________________________________________________________")
+                    admin.show(app_user, 'shared_woth')
+                    print("__________________________________________________________")
+                    input(ANSI_RED + "Presiona cualquier tecla para continuar: " + ANSI_RESET)
+
+                if action == "7":
+                    os.system("cls")
+                    print("CONTRASEÑAS QUE ME COMPARTEN:")
+                    print("__________________________________________________________")
+                    admin.show(app_user, 'shared_wme')
+                    print("__________________________________________________________")
+                    input(ANSI_RED + "Presiona cualquier tecla para continuar: " + ANSI_RESET)
+
+                if action == "8":
                     os.system('cls')
 
                     break

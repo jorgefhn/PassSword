@@ -14,7 +14,6 @@ class SymetricEncryptor:
         nonce = os.urandom(16)
         cipher = Cipher(algorithms.AES(key), modes.CTR(nonce))
         encryptor = cipher.encryptor()
-        print("Original message: " + str(message))
         encripted_message = encryptor.update(message.encode()) + encryptor.finalize()
 
         ##Mover aqui el signature
