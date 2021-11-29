@@ -2,6 +2,7 @@
 import time
 import json
 from cyber_security import SymetricEncryptor,HMAC,PasswordDerivation
+from cyber_security2 import generate_RSA_keys
 import base64
 
 ANSI_RESET = "\u001B[0m";
@@ -16,8 +17,9 @@ ANSI_WHITE = "\u001B[37m";
 
 class Admin:
     def __init__(self):
-        self.users = self.recover_json_information("./JSONS/app_users.json")["App_users"]
+        self.users = self.recover_json_information("./JSONS/app_users.json")
         self.external_accounts = self.recover_json_information("./JSONS/users_external_accounts.json")
+        self.shared_accounts = self.recover_json_information("./JSONS/shared_accounts.json")
         self.hmac = HMAC()
         self.password_derivation = PasswordDerivation()
         self.symetric_encryptor = SymetricEncryptor()
@@ -30,9 +32,12 @@ class Admin:
             self.users[user]
             print("User already taken, choose another one.")
         except KeyError:
+            generate_RSA_keys(user)
             self.save_users_information(user,password)
-            self.external_accounts[user] = {"shared": {}}
-            self.save_json_information(self.external_accounts,"JSONS/users_external_accounts.json")
+            self.external_accounts[user] = {}
+            self.shared_accounts[user] = {"shared_with_me": {}, "shared_with_other":[]}
+            self.save_json_information(self.external_accounts, "JSONS/users_external_accounts.json")
+            self.save_json_information(self.shared_accounts, "JSONS/shared_accounts.json")
 
 
     def add_external_account(self, site:str,app_user:str,user_name: str, password: str):
@@ -42,8 +47,7 @@ class Admin:
             json_app_users[user_name]
             print("User already taken, choose another one.")
         except KeyError:
-            self.external_accounts[app_user] = {"shared": {}}
-            self.save_external_account(site,app_user,user_name,password,None,None, self.external_accounts[app_user]["shared"])
+            self.save_external_account(site,app_user,user_name,password,None,None)
 
 
     def log_in_check_user(self, user_name, user_password):
@@ -88,13 +92,10 @@ class Admin:
         #función que deriva la contraseña
         password_derivated = self.password_derivation.password_derivator(str(password))
         #convertimos a bytes y luego a string para guardarlo en el json
-        b64_salt,b64_key = base64.urlsafe_b64encode(password_derivated[0]),base64.urlsafe_b64encode(password_derivated[1])
-        b64_string_salt,b64_string_key = b64_salt.decode("ascii"),b64_key.decode("ascii")
-        b64_string_password = [b64_string_salt,b64_string_key]
-        #guardamos contraseña
-        self.users[user] = b64_string_password  # metemos la clave y el salt
-        app_user = {"App_users": self.users}  # lo actualizas
-        self.save_json_information(app_user, "./JSONS/app_users.json")
+        b64_salt, b64_key = base64.urlsafe_b64encode(password_derivated[0]), base64.urlsafe_b64encode(password_derivated[1])
+        b64_string_salt, b64_string_key = b64_salt.decode("ascii"),b64_key.decode("ascii")
+        self.users[user] = [b64_string_salt, b64_string_key, 0, 0]
+        self.save_json_information(self.users, "./JSONS/app_users.json")
 
     def byte_decoded(self, password_derivated):
         b64_salt, b64_key = base64.urlsafe_b64encode(password_derivated[0]), base64.urlsafe_b64encode(
@@ -103,10 +104,8 @@ class Admin:
         b64_string_password = [b64_string_salt, b64_string_key]
         return b64_string_password
 
-    def save_external_account(self, site: str, user: str, site_user: str, password: str, sec_quest: str, notes: str,
-                              shared: dict):
+    def save_external_account(self, site: str, user: str, site_user: str, password: str, sec_quest: str, notes: str,):
         # recuperamos la información antigua del external accounts
-        ac = [site_user, password, sec_quest, notes]
         cifr = []
         # encriptar
         try:
@@ -117,7 +116,7 @@ class Admin:
             key = base64.urlsafe_b64decode(b64_key_bytes)  # key decodificada
 
             #guardamos la info en un str
-            ciph = "User:"+str(ac[0]) + "," + "Password:"+str(ac[1]) + "," + "sec_quest:"+str(ac[2]) + "," + "notes:"+str(ac[3])
+            ciph = "User:" + str(site_user) + "," + "Password:" + str(password) + "," + "sec_quest:" + str(sec_quest) + "," + "notes:"+ str(notes)
 
             answer = self.symetric_encryptor.symetric_encrypt(key, ciph)  # en formato de lista, ver si da error
             for element in answer:
@@ -142,7 +141,7 @@ class Admin:
             key = base64.urlsafe_b64decode(b64_key)  #
 
             for site in user_sites:
-                if site != "shared":
+                if site != "shared_with_me":
                     nonce = user_sites[site][0]
                     b64_nonce = nonce.encode("ascii")
                     nonce = base64.urlsafe_b64decode(b64_nonce)
@@ -167,23 +166,24 @@ class Admin:
         except KeyError:
             print(str(user)+": {}")
 
-    def share_password(self,user1:str,user2:str,site:str):
+    def share_password(self, user1:str, user2:str, site:str):
         """método para que user1 le comparta a user2 la contraseña de site"""
-        try:
-            json_external_accounts = self.recover_json_information("./JSONS/users_external_accounts.json")
 
+        json_external_accounts = self.recover_json_information("./JSONS/users_external_accounts.json")
+        shared_accounts = self.recover_json_information("./JSONS/shared_accounts.json")
+
+        try:
             u1 = json_external_accounts[user1] #comprobamos que el usuario que va a compartir está registrado en external_accounts
             u2 = json_external_accounts[user2] #comprobamos que el usuario que va a compartir está registrado en external_accounts
+
             #si lo está, comprobamos que el site es correcto
             s1 = u1[site] #búsqueda del  site 1
-            s2 = u2[site] #búsqueda del  site 2
-            #si llega hasta aquí, correcto
 
-            json_external_accounts[user2]['shared'] = [site,s1[0]] #se guarda en una lista la info con el sitio y la contraseña
-            json_external_accounts[user1]['shared'] = [site,s2[0]] #se guarda en una lista la info con el sitio y la contraseña
+            shared_accounts[user1]["shared_with_other"].append(site)
+            shared_accounts[user2]['shared_with_me'][site] = s1 #se guarda en una lista la info con el sitio y la contraseña
 
-            self.save_json_information(json_external_accounts,"./JSONS/users_external_accounts.json")
-
+            self.save_json_information(json_external_accounts, "./JSONS/users_external_accounts.json")
+            self.save_json_information(shared_accounts, "./JSONS/shared_accounts.json")
 
         except KeyError: #si no ha encontrado alguno de los dos sites de los usuarios emisor y receptor
             print(ANSI_RED+"Error: unable to share password"+ANSI_RESET)
