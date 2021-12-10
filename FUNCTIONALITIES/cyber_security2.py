@@ -3,6 +3,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
 from cryptography import x509
+import cryptography.exceptions
 from cryptography.x509.oid import NameOID
 import os
 
@@ -98,18 +99,6 @@ def load_private_key(user, csr=0):
     return private_key
 
 
-"Esta funcion nos sirve para cargar de un fichero pem la clave publica de un usuario"
-
-
-def load_public_key(user):
-    PEM_path = "./RSA_keys/PBKC_" + str(user) + ".pem"
-    with open(PEM_path, "rb") as key_file:
-        cert = x509.load_pem_x509_certificate(
-            key_file.read()
-        )
-    public_key = cert.public_key()
-    return public_key
-
 
 """Este modulo es el que usariamos para encriptar los usuarios y contraseñas de los usuario externos que quermemos
  compartir, al compartir deberiamos de fijar una fecha y ya cuando se caduca esa fecha se elimina del almacenamiento
@@ -154,3 +143,48 @@ def create_text_file(content, path):
     for i in content:
         file.write(i)
         file.close()
+
+def verify_cert_sign(AC_public_key, pem_data_to_check):
+    try:
+        issuer_public_key = AC_public_key
+        cert_to_check = pem_data_to_check
+        issuer_public_key.verify(
+            cert_to_check.signature,
+            cert_to_check.tbs_certificate_bytes,
+            padding.PKCS1v15(),
+            cert_to_check.signature_hash_algorithm,
+        )
+        return True
+    except cryptography.exceptions.InvalidSignature:
+        print("The signature of this certificate is not valid")
+        return False
+
+def load_AC_public_key():
+    PEM_path = "./AC/ACCert.pem"
+    with open(PEM_path, "rb") as key_file:
+        cert = x509.load_pem_x509_certificate(
+            key_file.read()
+        )
+    flag = verify_cert_sign(cert.public_key(), cert)
+    public_key = cert.public_key()
+    if flag:
+        return public_key
+    else:
+        print("Error: Not valid certificate")
+
+
+"Esta funcion nos sirve para cargar de un fichero pem la clave publica de un usuario"
+def load_public_key(user):
+    PEM_path = "./RSA_keys/PBKC_" + str(user) + ".pem"
+    with open(PEM_path, "rb") as key_file:
+        cert = x509.load_pem_x509_certificate(
+            key_file.read()
+        ) #este es el del usuario haria falta tambien el de AC1
+
+    AC_public_key = load_AC_public_key()            # Cargamos la clave publica de la autoridad de certificacion
+    flag = verify_cert_sign(AC_public_key, cert)    # Verificamos la firma del certificado correspondiente a la calve publica
+    public_key = cert.public_key()
+    if flag:
+        return public_key
+    else:
+        print("Error: Not valid certificate")
